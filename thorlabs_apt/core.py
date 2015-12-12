@@ -4,8 +4,56 @@ import ctypes
 import os
 
 # constants
+# Home direction
 HOME_FWD = 1
+"""Home in the forward direction"""
 HOME_REV = 2
+"""Home in the reverse direction"""
+
+# Home limit switch
+HOMELIMSW_FWD = 4
+"""Use forward limit switch for home datum"""
+HOMELIMSW_REV = 1
+"""Use reverse limit switch for home datum"""
+
+# Stage units
+STAGE_UNITS_MM = 1
+"""Stage units in mm"""
+STAGE_UNITS_DEG = 2
+"""Stage units in degrees"""
+
+# Hardware limit switch settings
+HWLIMSWITCH_IGNORE = 1
+"""Ignore limit switch (e.g. for stages with only one or no limit 
+   switches)."""
+HWLIMSWITCH_MAKES = 2
+"""Limit switch is activated when electrical continuity is detected."""
+HWLIMSWITCH_BREAKS = 3
+"""Limit switch is activated when electrical continuity is broken."""
+HWLIMSWITCH_MAKES_HOMEONLY = 4
+"""As per HWLIMSWITCH_MAKES except switch is ignored other than when homing 
+   (e.g. to support rotation stages)."""
+HWLIMSWITCH_BREAKS_HOMEONLY = 5
+"""As per HWLIMSWITCH_BREAKS except switch is ignored other than when homing 
+   (e.g. to support rotation stages)."""
+
+# Move direction (used with move_velocity)
+MOVE_FWD = 1
+"""Move forward."""
+MOVE_REV = 2
+"""Move reverse."""
+
+# Profile mode settings : set(get)_dc_profile_mode_params
+DC_PROFILEMODE_TRAPEZOIDAL = 0
+"""Trapezoidal profile mode"""
+DC_PROFILEMODE_SCURVE = 2
+"""s-curve profile mode"""
+
+# Joystick direction sense settings - set(get)_dc_joystick_params
+DC_JS_DIRSENSE_POS = 1
+"""positive dc joystick direction sense"""
+DC_JS_DIRSENSE_NEG = 2
+"""negative dc joystick direction sense"""
 
 def list_available_devices():
     """
@@ -135,13 +183,10 @@ class Motor(object):
     @property
     def active_channel(self):
         """
-        Returns active channel number. Used with motors having more than
-        1 channel.
+        Active channel number. Used with motors having more than 1 channel.
 
-        Returns
-        -------
-        out : int
-            channel number
+        CHAN1_INDEX = 0 : channel 1
+        CHAN2_INDEX = 1 : channel 2
         """
         return self._active_channel
 
@@ -294,11 +339,13 @@ class Motor(object):
         Parameters
         ----------
         direction : int
-            home in forward (1) or reverse (2) direction.
-            You can also use the constants HOME_FWD and HOME_REV.
+            home in forward or reverse direction:
+            - HOME_FWD = 1 : Home in the forward direction.
+            - HOME_REV = 2 : Home in the reverse direction.
         lim_switch : int
-            forward limit switch (4) or reverse limit switch (1).
-            You can also use the constants HOMELIMSW_FWD and HOMELIMSW_REV.
+            forward limit switch or reverse limit switch:
+            - HOMELIMSW_FWD = 4 : Use forward limit switch for home datum.
+            - HOMELIMSW_REV = 1 : Use reverse limit switch for home datum.
         velocity : float
             velocity of the motor
         zero_offset : float
@@ -378,6 +425,10 @@ class Motor(object):
         """
         Returns axis information of stage.
 
+        Stage units:
+        - STAGE_UNITS_MM = 1 : Stage units in mm
+        - STAGE_UNITS_DEG = 2 : Stage units in degrees
+
         Returns
         -------
         out : tuple
@@ -398,6 +449,10 @@ class Motor(object):
     def set_stage_axis_info(self, min_pos, max_pos, units, pitch):
         """
         Sets axis information of stage.
+        
+        Stage units:
+        - STAGE_UNITS_MM = 1 : Stage units in mm
+        - STAGE_UNITS_DEG = 2 : Stage units in degrees
 
         Parameters
         ----------
@@ -430,12 +485,29 @@ class Motor(object):
 
     def get_hardware_limit_switches(self):
         """
-        Returns hardware limit switches.
+        Returns hardware limit switch modes for reverse and forward direction.
+
+        HWLIMSWITCH_IGNORE = 1 : Ignore limit switch (e.g. for stages
+            with only one or no limit switches).
+        HWLIMSWITCH_MAKES = 2	: Limit switch is activated when electrical
+            continuity is detected.
+        HWLIMSWITCH_BREAKS = 3 : Limit switch is activated when electrical
+            continuity is broken.
+        HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except 
+            switch is ignored other than when homing (e.g. to support 
+            rotation stages).
+        HWLIMSWITCH_BREAKS_HOMEONLY = 5 : As per HWLIMSWITCH_BREAKS except
+            switch is ignored other than when homing (e.g. to support
+            rotation stages).
 
         Returns
         -------
         out : tuple
             (reverse limit switch, forward limit switch)
+
+        See also
+        --------
+        set_hardware_limit_switches
         """
         rev = ctypes.c_long()
         fwd = ctypes.c_long()
@@ -446,7 +518,20 @@ class Motor(object):
 
     def set_hardware_limit_switches(self, rev, fwd):
         """
-        Sets hardware limit switches.
+        Sets hardware limit switches for reverse and forward direction.
+
+        HWLIMSWITCH_IGNORE = 1 : Ignore limit switch (e.g. for stages
+            with only one or no limit switches).
+        HWLIMSWITCH_MAKES = 2	: Limit switch is activated when electrical
+            continuity is detected.
+        HWLIMSWITCH_BREAKS = 3 : Limit switch is activated when electrical
+            continuity is broken.
+        HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except 
+            switch is ignored other than when homing (e.g. to support 
+            rotation stages).
+        HWLIMSWITCH_BREAKS_HOMEONLY = 5 : As per HWLIMSWITCH_BREAKS except
+            switch is ignored other than when homing (e.g. to support
+            rotation stages).
 
         Parameters
         ----------
@@ -580,6 +665,13 @@ class Motor(object):
             raise Exception("Moving velocity failed.")
     
     def move_velocity(self, direction):
+        """
+        Parameters
+        ----------
+        direction : int
+            MOVE_FWD = 1 : Move forward
+            MOVE_REV = 2 : Move reverse
+        """
         if (_lib.MOT_MoveVelocity(self._serial_number, direction) != 0):
             raise Exception("Moving velocity failed.")
     
