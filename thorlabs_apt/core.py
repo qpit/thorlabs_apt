@@ -2,7 +2,6 @@ import _APTAPI
 
 import ctypes
 import os
-import functools
 
 def list_available_devices():
     # we have to check for all possible hardware types.
