@@ -603,7 +603,7 @@ class Motor(object):
             set_pid_parameters)
     """PID controller: Integrator limit"""
 
-    def move_to_absolute_position(self, value, blocking = False):
+    def move_to(self, value, blocking = False):
         """
         Move to absolute position.
 
@@ -619,7 +619,7 @@ class Motor(object):
                 blocking) != 0):
             raise Exception("Setting absolute position failed.")
     
-    def move_relative(self, value, blocking = False):
+    def move_by(self, value, blocking = False):
         """
         Move relative to current position.
 
@@ -648,7 +648,7 @@ class Motor(object):
 
     @position.setter
     def position(self, value):
-        self.move_to_absolute_position(value, False)
+        self.move_to(value, False)
 
     
     def move_home(self, blocking = False):
