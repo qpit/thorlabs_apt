@@ -212,7 +212,7 @@ class Motor(object):
 
     def identify(self):
         """
-        Lets flashing the 'Active' LED at the motor to identify it.
+        Flashes the 'Active' LED at the motor to identify it.
         """
         if (_lib.MOT_Identify(self._serial_number) != 0):
             raise Exception("Identifing device failed.")
@@ -410,29 +410,33 @@ class Motor(object):
     """Motor parameter: Gear box ratio"""
 
     @property
-    def backlash_correction(self):
+    def backlash_distance(self):
         """
-        Backlash correction.
+        Backlash distance.
         """
         backlash = ctypes.c_float()
         if (_lib.MOT_GetBLashDist(self._serial_number, 
             ctypes.byref(backlash)) != 0):
-            raise Exception("Failed getting backlash correction value.")
+            raise Exception("Failed getting backlash distance.")
         else:
             return backlash.value
+
+    @backlash_distance.setter
+    def blacklash_distance(self, value):
+        if (_lib.MOT_SetBLashDist(self._serial_number, value) != 0):
+            raise Exception("Setting backlash distance failed.")
+
 
     def get_stage_axis_info(self):
         """
         Returns axis information of stage.
 
-        Stage units:
-        - STAGE_UNITS_MM = 1 : Stage units in mm
-        - STAGE_UNITS_DEG = 2 : Stage units in degrees
-
         Returns
         -------
         out : tuple
             (minimum position, maximum position, stage units, pitch)
+            - STAGE_UNITS_MM = 1 : Stage units in mm
+            - STAGE_UNITS_DEG = 2 : Stage units in degrees
         """
         min_pos = ctypes.c_float()
         max_pos = ctypes.c_float()
@@ -450,9 +454,6 @@ class Motor(object):
         """
         Sets axis information of stage.
         
-        Stage units:
-        - STAGE_UNITS_MM = 1 : Stage units in mm
-        - STAGE_UNITS_DEG = 2 : Stage units in degrees
 
         Parameters
         ----------
@@ -461,8 +462,9 @@ class Motor(object):
         max_pos : float
             maximum position
         units : int
-            stage units (mm 1, deg 2).
-            You can use the constants STAGE_UNITS_MM and STAGE_UNITS_DEG.
+            stage units:
+            - STAGE_UNITS_MM = 1 : Stage units in mm
+            - STAGE_UNITS_DEG = 2 : Stage units in degrees
         pitch : float
             pitch
         """
@@ -487,23 +489,22 @@ class Motor(object):
         """
         Returns hardware limit switch modes for reverse and forward direction.
 
-        HWLIMSWITCH_IGNORE = 1 : Ignore limit switch (e.g. for stages
-            with only one or no limit switches).
-        HWLIMSWITCH_MAKES = 2	: Limit switch is activated when electrical
-            continuity is detected.
-        HWLIMSWITCH_BREAKS = 3 : Limit switch is activated when electrical
-            continuity is broken.
-        HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except 
-            switch is ignored other than when homing (e.g. to support 
-            rotation stages).
-        HWLIMSWITCH_BREAKS_HOMEONLY = 5 : As per HWLIMSWITCH_BREAKS except
-            switch is ignored other than when homing (e.g. to support
-            rotation stages).
-
         Returns
         -------
         out : tuple
             (reverse limit switch, forward limit switch)
+            HWLIMSWITCH_IGNORE = 1 : Ignore limit switch (e.g. for stages
+                with only one or no limit switches).
+            HWLIMSWITCH_MAKES = 2	: Limit switch is activated when electrical
+                continuity is detected.
+            HWLIMSWITCH_BREAKS = 3 : Limit switch is activated when electrical
+                continuity is broken.
+            HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except 
+                switch is ignored other than when homing (e.g. to support 
+                rotation stages).
+            HWLIMSWITCH_BREAKS_HOMEONLY = 5 : As per HWLIMSWITCH_BREAKS except
+                switch is ignored other than when homing (e.g. to support
+                rotation stages).
 
         See also
         --------
@@ -681,7 +682,470 @@ class Motor(object):
         """
         if (_lib.MOT_StopProfiled(self._serial_number) != 0):
             raise Exception("Stop profiled failed: ")
+
+    def get_dc_current_loop_parameters(self):
+        """
+        Returns DC current loop parameters.
+
+        Returns
+        -------
+        out : tuple
+            (proportional, integrator, integrator_limit, integrator_dead_band,
+             fast_forward)
+        """
+        proportional = ctypes.c_long()
+        integrator = ctypes.c_long()
+        integrator_limit = ctypes.c_long()
+        integrator_dead_band = ctypes.c_long()
+        fast_forward = ctypes.c_long()
+        if (_lib.MOT_GetDCCurrentLoopParams(self._serial_number,
+                ctypes.byref(proportional),
+                ctypes.byref(integrator),
+                ctypes.byref(integrator_limit),
+                ctypes.byref(integrator_dead_band),
+                ctypes.byref(fast_forward)) != 0):
+            raise Exception("Getting DC current loop parameters failed.")
+        return (proportional.value, integrator.value, integrator_limit.value,
+                integrator_dead_band.value, fast_forward.value)
+
+    def set_dc_current_loop_parameters(self, proportional, integrator,
+            integrator_limit, integrator_dead_band, fast_forward):
+        """
+        Sets DC current loop parameters.
+
+        Parameters
+        ----------
+        proportional : int
+        integrator : int
+        integrator_limit : int
+        integrator_dead_band : int
+        fast_forward : int
+        """
+        if (_lib.MOT_SetDCCurrentLoopParams(self._serial_number,
+                proportional, integrator, integrator_limit, 
+                integrator_dead_band, fast_forward) != 0):
+            raise Exception("Setting DC current loop parameters failed.")
+
+    dc_current_loop_proportional = __property_from_index(0, 
+            get_dc_current_loop_parameters,
+            set_dc_current_loop_parameters)
+    """DC current loop: proportional term"""
+    dc_current_loop_integrator = __property_from_index(1, 
+            get_dc_current_loop_parameters,
+            set_dc_current_loop_parameters)
+    """DC current loop: integrator term"""
+    dc_current_loop_integrator_limit = __property_from_index(2, 
+            get_dc_current_loop_parameters,
+            set_dc_current_loop_parameters)
+    """DC current loop: integrator limit"""
+    dc_current_loop_integrator_dead_band = __property_from_index(3, 
+            get_dc_current_loop_parameters,
+            set_dc_current_loop_parameters)
+    """DC current loop: integrator dead band"""
+    dc_current_loop_fast_forward = __property_from_index(4, 
+            get_dc_current_loop_parameters,
+            set_dc_current_loop_parameters)
+    """DC current loop: fast forward"""
     
+    def get_dc_position_loop_parameters(self):
+        """
+        Returns DC position loop parameters.
+
+        Returns
+        -------
+        out : tuple
+            (proportional, integrator, integrator limit, differentiator,
+             differentiator time constant, loop gain, velocity fast forward,
+             acceleration fast forward, position error limit)
+        """
+        proportional = ctypes.c_long()
+        integrator = ctypes.c_long()
+        integrator_limit = ctypes.c_long()
+        differentiator = ctypes.c_long()
+        differentiator_time_constant = ctypes.c_long()
+        loop_gain = ctypes.c_long()
+        velocity_fast_forward = ctypes.c_long()
+        acceleration_fast_forward = ctypes.c_long()
+        position_error_limit = ctypes.c_long()
+        if (_lib.MOT_GetDCPositionLoopParams(self._serial_number,
+                ctypes.byref(proportional),
+                ctypes.byref(integrator),
+                ctypes.byref(integrator_limit),
+                ctypes.byref(differentiator),
+                ctypes.byref(differentiator_time_constant),
+                ctypes.byref(loop_gain),
+                ctypes.byref(velocity_fast_forward),
+                ctypes.byref(acceleration_fast_forward),
+                ctypes.byref(position_error_limit)) != 0):
+            raise Exception("Getting DC position loop parameters failed.")
+        return (proportional.value, 
+                integrator.value, 
+                integrator_limit.value,
+                differentiator.value, 
+                differentiator_time_constant.value,
+                loop_gain.value,
+                velocity_fast_forward.value,
+                acceleration_fast_forward.value,
+                position_error_limit.value
+               )
+    
+    def set_dc_position_loop_parameters(self, proportional, integrator,
+            integrator_limit, differentiator, differentiator_time_constant,
+            loop_gain, velocity_fast_forward, acceleration_fast_forward,
+            position_error_limit):
+        """
+        Sets DC position loop parameters.
+
+        Parameters
+        ----------
+        proportional : int
+        integrator : int
+        integrator_limit : int
+        differentiator : int
+        differentiator_time_constant : int
+        loop_gain : int
+        velocity_fast_forward : int
+        acceleration_fast_forward : int
+        position_error_limit : int
+        """
+        if (_lib.MOT_SetDCPositionLoopParams(self._serial_number,
+                proportional, 
+                integrator, 
+                integrator_limit,
+                differentiator,
+                differentiator_time_constant,
+                loop_gain,
+                velocity_fast_forward,
+                acceleration_fast_forward,
+                position_error_limit) != 0):
+            raise Exception("Setting DC position loop parameters failed.")
+
+    dc_position_loop_proportional = __property_from_index(0,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: proportional term"""
+    dc_position_loop_integrator = __property_from_index(1,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: integrator term"""
+    dc_position_loop_integrator_limit = __property_from_index(2,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: integrator limit"""
+    dc_position_loop_differentiator = __property_from_index(3,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: differentiator"""
+    dc_position_loop_differentiator_time_constant = __property_from_index(4,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: differentiator time constant"""
+    dc_position_loop_gain = __property_from_index(5,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: loop gain"""
+    dc_position_loop_velocity_fast_forward = __property_from_index(6,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: velocity fast forward"""
+    dc_position_loop_acceleration_fast_forward = __property_from_index(7,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: acceleration fast forward"""
+    dc_position_loop_position_error_limit = __property_from_index(8,
+            get_dc_position_loop_parameters, set_dc_position_loop_parameters)
+    """DC position loop: position error limit"""
+    
+    def get_dc_motor_output_parameters(self):
+        """
+        Returns DC motor output parameters.
+
+        Returns
+        -------
+        out : tuple
+            (continuous current limit, energy limit, motor limit, motor bias)
+        """
+        continuous_current_limit = ctypes.c_float()
+        energy_limit = ctypes.c_float()
+        motor_limit = ctypes.c_float()
+        motor_bias = ctypes.c_float()
+        if (_lib.MOT_GetDCMotorOutputParams(self._serial_number,
+                ctypes.byref(continuous_current_limit),
+                ctypes.byref(energy_limit),
+                ctypes.byref(motor_limit),
+                ctypes.byref(motor_bias)) != 0):
+            raise Exception("Getting DC motor output parameters failed.")
+        return (continuous_current_limit.value, 
+                energy_limit.value, 
+                motor_limit.value,
+                motor_bias.value
+               )
+
+    def set_dc_motor_output_parameters(self, continuous_current_limit,
+            energy_limit, motor_limit, motor_bias):
+        """
+        Sets DC motor output parameters.
+
+        Parameters
+        ----------
+        continuous_current_limit : float
+        energy_limit : float
+        motor_limit : float
+        motor_bias : float
+        """
+        if (_lib.MOT_SetDCMotorOutputParams(self._serial_number,
+                continuous_current_limit, 
+                energy_limit, 
+                motor_limit,
+                motor_bias) != 0):
+            raise Exception("Setting DC motor output parameters failed.")
+
+    dc_motor_output_continuous_current_limit = __property_from_index(0,
+            get_dc_motor_output_parameters, set_dc_motor_output_parameters)
+    """DC motor output: continuous current limit"""
+    dc_motor_output_energy_limit = __property_from_index(1,
+            get_dc_motor_output_parameters, set_dc_motor_output_parameters)
+    """DC motor output: energy limit"""
+    dc_motor_output_motor_limit = __property_from_index(2,
+            get_dc_motor_output_parameters, set_dc_motor_output_parameters)
+    """DC motor output: motor limit"""
+    dc_motor_output_motor_bias = __property_from_index(3,
+            get_dc_motor_output_parameters, set_dc_motor_output_parameters)
+    """DC motor output: motor bias"""
+    
+    
+    def get_dc_track_settle_parameters(self):
+        """
+        Returns DC track settle parameters.
+
+        Returns
+        -------
+        out : tuple
+            (settle time, settle window, track window)
+        """
+        settle_time = ctypes.c_long()
+        settle_window = ctypes.c_long()
+        track_window = ctypes.c_long()
+        if (_lib.MOT_GetDCTrackSettleParams(self._serial_number,
+                ctypes.byref(settle_time),
+                ctypes.byref(settle_window),
+                ctypes.byref(track_window)) != 0):
+            raise Exception("Getting DC track settle parameters failed.")
+        return (settle_time.value, 
+                settle_window.value, 
+                track_window.value
+               )
+    
+    def set_dc_track_settle_parameters(self, settle_time, settle_window, 
+            track_window):
+        """
+        Sets track settle parameters.
+
+        Parameters
+        ----------
+        settle_time : int
+        settle_window : int
+        track_window : int
+        """
+        if (_lib.MOT_SetDCTrackSettleParams(self._serial_number,
+                settle_time, 
+                settle_window, 
+                track_window) != 0):
+            raise Exception("Setting DC track settle parameters failed.")
+
+    dc_track_settle_settle_time = __property_from_index(0,
+            get_dc_track_settle_parameters, set_dc_track_settle_parameters)
+    """DC track settle: settle time"""
+    dc_track_settle_settle_window = __property_from_index(1,
+            get_dc_track_settle_parameters, set_dc_track_settle_parameters)
+    """DC track settle: settle window"""
+    dc_track_settle_track_window = __property_from_index(2,
+            get_dc_track_settle_parameters, set_dc_track_settle_parameters)
+    """DC track settle: track window"""
+    
+
+    def get_dc_profile_mode_parameters(self):
+        """
+        Returns DC profile mode parameters.
+
+
+        Returns
+        -------
+        out : tuple
+            (profile mode, jerk)
+            
+            Profile mode:
+            - DC_PROFILEMODE_TRAPEZOIDAL = 0
+            - DC_PROFILEMODE_SCURVE = 2
+        """
+        profile_mode = ctypes.c_long()
+        jerk = ctypes.c_float()
+        if (_lib.MOT_GetDCProfileModeParams(self._serial_number,
+                ctypes.byref(profile_mode),
+                ctypes.byref(jerk)) != 0):
+            raise Exception("Getting DC profile mode parameters failed.")
+        return (profile_mode.value, 
+                jerk.value
+               )
+    
+    def set_dc_profile_mode_parameters(self, profile_mode, jerk):
+        """
+        Sets DC profile mode parameters.
+
+        Parameters
+        ----------
+        profile_mode : int
+            - DC_PROFILEMODE_TRAPEZOIDAL = 0
+            - DC_PROFILEMODE_SCURVE = 2
+        jerk : float
+        """
+        if (_lib.MOT_SetDCTrackSettleParams(self._serial_number,
+                profile_mode,
+                jerk) != 0):
+            raise Exception("Setting DC profile mode parameters failed.")
+    
+    dc_profile_mode = __property_from_index(0,
+            get_dc_profile_mode_parameters, set_dc_profile_mode_parameters)
+    """DC profile mode: profile mode"""
+    dc_profile_mode_jerk = __property_from_index(1,
+            get_dc_profile_mode_parameters, set_dc_profile_mode_parameters)
+    """DC profile mode: jerk"""
+
+    def get_dc_joystick_parameters(self):
+        """
+        Returns DC joystick parameters.
+
+        Returns
+        -------
+        out : tuple
+            (maximum velocity lo, maximum velocity hi, acceleration lo,
+             acceleration hi, direction sense)
+            direction sense:
+            - DC_JS_DIRSENSE_POS = 1
+            - DC_JS_DIRSENSE_NEG = 2
+        """
+        maximum_velocity_lo = ctypes.c_float()
+        maximum_velocity_hi = ctypes.c_float()
+        acceleration_lo = ctypes.c_float()
+        acceleration_hi = ctypes.c_float()
+        direction_sense = ctypes.c_long()
+        if (_lib.MOT_GetDCJoystickParams(self._serial_number,
+                ctypes.byref(maximum_velocity_lo),
+                ctypes.byref(maximum_velocity_hi),
+                ctypes.byref(acceleration_lo),
+                ctypes.byref(acceleration_hi),
+                ctypes.byref(direction_sense)) != 0):
+            raise Exception("Getting DC joystick parameters failed.")
+        return (maximum_velocity_lo.value, 
+                maximum_velocity_hi.value,
+                acceleration_lo.value,
+                acceleration_hi.value,
+                direction_sense.value
+               )
+    
+    def set_dc_joystick_parameters(self, maximum_velocity_lo,
+            maximum_velocity_hi, acceleration_lo, acceleration_hi,
+            direction_sense):
+        """
+        Sets DC joystick parameters.
+
+        Parameters
+        ----------
+        maximum_velocity_lo : float
+        maximum_velocity_hi : float
+        acceleration_lo : float
+        acceleration_hi : float
+        direction_sense : int
+            - DC_JS_DIRSENSE_POS = 1
+            - DC_JS_DIRSENSE_NEG = 2
+        """
+        if (_lib.MOT_SetDCJoystickParams(self._serial_number,
+                maximum_velocity_lo,
+                maximum_velocity_hi,
+                acceleration_lo,
+                acceleration_hi) != 0):
+            raise Exception("Setting DC joystick parameters failed.")
+    
+    dc_joystick_maximum_velocity_lo = __property_from_index(0,
+            get_dc_joystick_parameters, set_dc_joystick_parameters)
+    """DC joystick: maximum velocity lo"""
+    dc_joystick_maximum_velocity_hi = __property_from_index(1,
+            get_dc_joystick_parameters, set_dc_joystick_parameters)
+    """DC joystick: maximum velocity hi"""
+    dc_joystick_acceleration_lo = __property_from_index(2,
+            get_dc_joystick_parameters, set_dc_joystick_parameters)
+    """DC joystick: acceleration lo"""
+    dc_joystick_acceleration_hi = __property_from_index(3,
+            get_dc_joystick_parameters, set_dc_joystick_parameters)
+    """DC joystick: acceleration hi"""
+    dc_joystick_direction_sense = __property_from_index(4,
+            get_dc_joystick_parameters, set_dc_joystick_parameters)
+    """DC joystick: direction sense"""
+    
+    def get_dc_settled_current_loop_parameters(self):
+        """
+        Returns DC settled current loop parameters.
+
+        Returns
+        -------
+        out : tuple
+            (proportional, integrator, integrator_limit, integrator dead band,
+             fast forward)
+        """
+        settled_proportional = ctypes.c_long()
+        settled_integrator = ctypes.c_long()
+        settled_integrator_limit = ctypes.c_long()
+        settled_integrator_dead_band = ctypes.c_long()
+        settled_fast_forward = ctypes.c_long()
+        if (_lib.MOT_GetDCSettledCurrentLoopParams(self._serial_number,
+                ctypes.byref(settled_proportional),
+                ctypes.byref(settled_integrator),
+                ctypes.byref(settled_integrator_limit),
+                ctypes.byref(settled_integrator_dead_band),
+                ctypes.byref(settled_fast_forward)) != 0):
+            raise Exception("Getting DC settled current loop parameters failed.")
+        return (settled_proportional.value, 
+                settled_integrator.value,
+                settled_integrator_limit.value,
+                settled_integrator_dead_band.value,
+                settled_fast_forward.value
+               )
+    
+    def set_dc_settled_current_loop_parameters(self, settled_proportional,
+            settled_integrator, settled_integrator_limit, 
+            settled_integrator_dead_band, settled_fast_forward):
+        """
+        Sets DC settled current loop parameters.
+
+        Parameters
+        ----------
+        settled_proportional : int
+        settled_integrator : int
+        settled_integrator_limit : int
+        settled_integrator_dead_band : int
+        settled_fast_forward : int
+        """
+        if (_lib.MOT_SetDCJoystickParams(self._serial_number,
+                settled_proportional,
+                settled_integrator,
+                settled_integrator_limit,
+                settled_integrator_dead_band,
+                settled_fast_forward) != 0):
+            raise Exception("Setting DC settled current loop parameters failed.")
+    
+    dc_settled_current_loop_proportional = __property_from_index(0,
+            get_dc_settled_current_loop_parameters,
+            set_dc_settled_current_loop_parameters)
+    """DC settled current loop: proportional term"""
+    dc_settled_current_loop_integrator = __property_from_index(1,
+            get_dc_settled_current_loop_parameters,
+            set_dc_settled_current_loop_parameters)
+    """DC settled current loop: integrator term"""
+    dc_settled_current_loop_integrator_limit = __property_from_index(2,
+            get_dc_settled_current_loop_parameters,
+            set_dc_settled_current_loop_parameters)
+    """DC settled current loop: integrator limit"""
+    dc_settled_current_loop_integrator_dead_band = __property_from_index(3,
+            get_dc_settled_current_loop_parameters,
+            set_dc_settled_current_loop_parameters)
+    """DC settled current loop: integrator dead band"""
+    dc_settled_current_loop_fast_forward = __property_from_index(4,
+            get_dc_settled_current_loop_parameters,
+            set_dc_settled_current_loop_parameters)
+    """DC settled current loop: fast forward"""
+
 
 def _load_library():
     """
