@@ -36,6 +36,7 @@ if __name__=='__main__':
         license = LICENSE,
         url = URL,
         download_url = DOWNLOAD_URL,
+        version = VERSION,
         description = DESCRIPTION,
         long_description = LONG_DESCRIPTION,
         classifiers = filter(None, CLASSIFIERS.split('\n')),
