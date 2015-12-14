@@ -3,6 +3,7 @@ from . import _error_codes
 
 import ctypes
 import os
+import sys
 
 # constants
 # Home direction
@@ -1349,18 +1350,23 @@ def _load_library():
     if (os.name != 'nt'):
         raise Exception("Your operating system is not supported. " \
                 "Thorlabs' APT API only works on Windows.")  
-    filename = "%s/APT.dll" % os.path.dirname(__file__)
-    #lib = ctypes.util.find_library(filename)
-    #if (lib is None):
-    #    raise Exception("Could not find shared library APT.dll.")
-    #else:
-    lib = ctypes.windll.LoadLibrary(filename)
-    if (lib is not None):
-        _APTAPI.set_ctypes_argtypes(lib)
-        if (lib.APTInit() != 0):
-            raise Exception("Thorlabs APT Initialization failed.")
-        if (lib.EnableEventDlg(False) != 0):
-            raise Exception("Couldn't disable event dialog.")
+    lib = None
+    filename = ctypes.util.find_library("APT")
+    if (filename is not None):
+        lib = ctypes.windll.LoadLibrary(filename)
+    else:
+        filename = "%s/APT.dll" % os.path.dirname(__file__)
+        lib = ctypes.windll.LoadLibrary(filename)
+        if (lib is None):
+            filename = "%s/APT.dll" % os.path.dirname(sys.argv[0])
+            lib = ctypes.windll.LoadLibrary(lib)
+            if (lib is None):
+                raise Exception("Could not find shared library APT.dll.")
+    _APTAPI.set_ctypes_argtypes(lib)
+    if (lib.APTInit() != 0):
+        raise Exception("Thorlabs APT Initialization failed.")
+    if (lib.EnableEventDlg(False) != 0):
+        raise Exception("Couldn't disable event dialog.")
     return lib
 
 _lib = None
