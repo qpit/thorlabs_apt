@@ -10,12 +10,13 @@ LONG_DESCRIPTION = '''\
 thorlabs_apt provides a wrapper for Thorlabs\' APT, a library to control different Thorlabs motors.
 '''
 CLASSIFIERS = """\
-Development Status :: 2 - Beta
+Development Status :: 4 - Beta
 Intended Audience :: Science/Research
 License :: OSI Approved :: GNU General Public License v2 (GPLv2)
 Programming Language :: Python
 Topic :: Scientific/Engineering
-Topic :: Software Development
+Topic :: Software Development :: Libraries
+Topic :: System :: Hardware
 Operating System :: Microsoft :: Windows
 """
 PLATFORMS = ['Windows']
