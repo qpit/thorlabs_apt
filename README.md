@@ -28,7 +28,7 @@ and then moved relative by 45 degree.
 ```python
     >>> import thorlabs_apt as apt
     >>> apt.list_available_devices()
-    [[50, 55000038]
+    [(50, 55000038)]
     >>> motor = apt.Motor(55000038)
     >>> motor.move_home(True)
     >>> motor.move_by(45)
