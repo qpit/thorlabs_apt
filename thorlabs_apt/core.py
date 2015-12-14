@@ -192,11 +192,15 @@ class Motor(object):
         return hardware_info(self._serial_number)
 
     @property
-    def status(self):
+    def _status_bits(self):
         """
-        Returns status of motor
+        Returns status bits of motor
+
+        Returns
+        -------
+        out : int
+            status bits
         """
-        # TODO find out what the individual bits mean
         status_bits = ctypes.c_long()
         err_code = _lib.MOT_GetStatusBits(self._serial_number, 
                 ctypes.byref(status_bits))
@@ -204,6 +208,91 @@ class Motor(object):
             raise Exception("Getting status failed: %s" % 
                     _get_error_text(err_code))
         return status_bits.value
+    
+    @property
+    def is_forward_hardware_limit_switch_active(self):
+        """
+        Returns whether forward hardware limit switch is active.
+        """
+        status_bits = self._status_bits
+        mask = 0x00000001
+        return bool(status_bits & mask)
+
+    @property
+    def is_reverse_hardware_limit_switch_active(self):
+        """
+        Returns whether reverse hardware limit switch is active.
+        """
+        status_bits = self._status_bits
+        mask = 0x00000002
+        return bool(status_bits & mask)
+
+    @property
+    def is_in_motion(self):
+        """
+        Returns whether motor is in motion.
+        """
+        status_bits = self._status_bits
+        mask = 0x00000010 | 0x00000020 | 0x00000040 | 0x00000080 | 0x00000200
+        return bool(status_bits & mask)
+
+    @property
+    def has_homing_been_completed(self):
+        """
+        Returns whether homing has been completed at some point.
+        """
+        status_bits = self._status_bits
+        mask = 0x00000400
+        return bool(status_bits & mask)
+
+    @property
+    def is_tracking(self):
+        """
+        Returns whether motor is tracking.
+        """
+        status_bits = self._status_bits
+        mask = 0x00001000
+        return bool(status_bits & mask)
+
+    @property
+    def is_settled(self):
+        """
+        Returns whether motor is settled.
+        """
+        status_bits = self._status_bits
+        mask = 0x00002000
+        return bool(status_bits & mask)
+
+    @property
+    def motor_current_limit_reached(self):
+        """
+        Return whether current limit of motor has been reached.
+        """
+        status_bits = self._status_bits
+        mask = 0x01000000
+        return bool(status_bits & mask)
+
+    @property
+    def motion_error(self):
+        """
+        Returns whether there is a motion error (= excessing position error).
+        """
+        status_bits = self._status_bits
+        mask = 0x00004000
+        return bool(status_bits & mask)
+
+    @property
+    def is_channel_enabled(self):
+        """
+        Return whether active channel is enabled.
+
+        See also
+        --------
+        active_channel
+        """
+        status_bits = self._status_bits
+        mask = 0x80000000
+        return bool(status_bits & mask)
 
     @property
     def active_channel(self):
