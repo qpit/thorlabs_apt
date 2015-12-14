@@ -1,5 +1,5 @@
-import _APTAPI
-import _error_codes
+from . import _APTAPI
+from . import _error_codes
 
 import ctypes
 import os
@@ -93,7 +93,7 @@ def list_available_devices():
     for hwtype in range(100):
         if (_lib.GetNumHWUnitsEx(hwtype, ctypes.byref(count)) == 0):
             # found an existing hardware type
-            if (count > 0):
+            if (count.value > 0):
                 # devices are available!!
                 # get their serial number
                 serial_number = ctypes.c_long()
