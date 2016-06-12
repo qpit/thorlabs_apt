@@ -2,6 +2,7 @@ from . import _APTAPI
 from . import _error_codes
 
 import ctypes
+import ctypes.util
 import os
 import sys
 
