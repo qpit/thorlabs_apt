@@ -15,9 +15,17 @@ Since this package is based on APT.dll it only works on Windows. For Linux and M
     - into the "thorlabs_apt" folder
     - your python application directory
 
-**Known issues**
+**List of reported working devices**
 
 I have tested thorlabs_apt only with the K10CR1 rotation stage, but it should work with all motors supported by APT. If it works with other motors as well, please let me know and I will add it here. Otherwise file a bug report or fix the problem yourself and open a pull request.
+
+- BSC201
+- K10CR1
+- KDC101
+
+**Known issues**
+
+- If the package has been imported and a new device is plugged into the USB port, list_available_devices() cannot find it. The reason is that the list of available devices in APT.DLL is initialized when APTInit() is called. However, calling APTCleanUp() and APTInit() will kill all existing communication to other devices. If you have a good solution for that, I'm happy to hear it, but I fear that this is a limitation of APT.DLL.
 
 **Example**
 
