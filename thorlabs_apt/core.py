@@ -27,17 +27,17 @@ STAGE_UNITS_DEG = 2
 
 # Hardware limit switch settings
 HWLIMSWITCH_IGNORE = 1
-"""Ignore limit switch (e.g. for stages with only one or no limit 
+"""Ignore limit switch (e.g. for stages with only one or no limit
    switches)."""
 HWLIMSWITCH_MAKES = 2
 """Limit switch is activated when electrical continuity is detected."""
 HWLIMSWITCH_BREAKS = 3
 """Limit switch is activated when electrical continuity is broken."""
 HWLIMSWITCH_MAKES_HOMEONLY = 4
-"""As per HWLIMSWITCH_MAKES except switch is ignored other than when homing 
+"""As per HWLIMSWITCH_MAKES except switch is ignored other than when homing
    (e.g. to support rotation stages)."""
 HWLIMSWITCH_BREAKS_HOMEONLY = 5
-"""As per HWLIMSWITCH_BREAKS except switch is ignored other than when homing 
+"""As per HWLIMSWITCH_BREAKS except switch is ignored other than when homing
    (e.g. to support rotation stages)."""
 
 # Move direction (used with move_velocity)
@@ -57,7 +57,7 @@ DC_JS_DIRSENSE_POS = 1
 """positive dc joystick direction sense"""
 DC_JS_DIRSENSE_NEG = 2
 """negative dc joystick direction sense"""
-    
+
 def _get_error_text(error_code):
     """
     Returns an error text for the specified error code.
@@ -74,7 +74,7 @@ def _get_error_text(error_code):
             return _error_codes.error_message[error_code]
         except:
             return "Invalid error code."
-    
+
 
 def list_available_devices():
     """
@@ -100,7 +100,7 @@ def list_available_devices():
                 # get their serial number
                 serial_number = ctypes.c_long()
                 for ii in range(count.value):
-                    if (_lib.GetHWSerialNumEx(hwtype, ii, 
+                    if (_lib.GetHWSerialNumEx(hwtype, ii,
                         ctypes.byref(serial_number)) == 0):
                         devices.append((hwtype, serial_number.value))
     return devices
@@ -126,7 +126,7 @@ def hardware_info(serial_number):
     err_code = _lib.GetHWInfo(serial_number, model, len(model),
         swver, len(swver), hwnotes, len(hwnotes))
     if (err_code != 0):
-        raise Exception("Getting hardware info failed: %s" % 
+        raise Exception("Getting hardware info failed: %s" %
                 _get_error_text(err_code))
     return (model.value, swver.value, hwnotes.value)
 
@@ -147,7 +147,7 @@ class Motor(object):
         # initialize device
         err_code = _lib.InitHWDevice(serial_number)
         if (err_code != 0):
-            raise Exception("Could not initialize device: %s" % 
+            raise Exception("Could not initialize device: %s" %
                     _get_error_text(err_code))
 
     def __property_from_index(index, get_func, set_func):
@@ -204,13 +204,13 @@ class Motor(object):
             status bits
         """
         status_bits = ctypes.c_long()
-        err_code = _lib.MOT_GetStatusBits(self._serial_number, 
+        err_code = _lib.MOT_GetStatusBits(self._serial_number,
                 ctypes.byref(status_bits))
         if (err_code != 0):
-            raise Exception("Getting status failed: %s" % 
+            raise Exception("Getting status failed: %s" %
                     _get_error_text(err_code))
         return status_bits.value
-    
+
     @property
     def is_forward_hardware_limit_switch_active(self):
         """
@@ -310,7 +310,7 @@ class Motor(object):
     def active_channel(self, channel):
         err_code = _lib.MOT_SetChannel(self._serial_number, channel)
         if (err_code != 0):
-            raise Exception("Setting channel %d failed: %s" % 
+            raise Exception("Setting channel %d failed: %s" %
                     (channel, _get_error_text(err_code)))
         self._active_channel = channel
 
@@ -320,9 +320,9 @@ class Motor(object):
         """
         err_code = _lib.MOT_EnableHWChannel(self._serial_number)
         if (err_code != 0):
-            raise Exception("Enabling channel failed: %s" % 
+            raise Exception("Enabling channel failed: %s" %
                     _get_error_text(err_code))
-    
+
     def disable(self):
         """
         Disables the motor (the active channel).
@@ -338,7 +338,7 @@ class Motor(object):
         """
         err_code = _lib.MOT_Identify(self._serial_number)
         if (err_code != 0):
-            raise Exception("Identifing device failed: %s" % 
+            raise Exception("Identifing device failed: %s" %
                     _get_error_text(err_code))
 
     def get_velocity_parameters(self):
@@ -353,9 +353,9 @@ class Motor(object):
         min_vel = ctypes.c_float()
         accn = ctypes.c_float()
         max_vel = ctypes.c_float()
-        err_code = _lib.MOT_GetVelParams(self._serial_number, 
+        err_code = _lib.MOT_GetVelParams(self._serial_number,
                 ctypes.byref(min_vel),
-                ctypes.byref(accn), 
+                ctypes.byref(accn),
                 ctypes.byref(max_vel))
         if (err_code != 0):
             raise Exception("Getting velocity parameters failed: %s" %
@@ -376,7 +376,7 @@ class Motor(object):
         max_vel : float
             maximum velocity
         """
-        err_code = _lib.MOT_SetVelParams(self._serial_number, 
+        err_code = _lib.MOT_SetVelParams(self._serial_number,
                 min_vel, accn, max_vel)
         if (err_code != 0):
             raise Exception("Setting velocity parameters failed: %s" %
@@ -395,7 +395,7 @@ class Motor(object):
     def get_velocity_parameter_limits(self):
         """
         Returns the maximum acceleration and the maximum velocity of
-        the motor. 
+        the motor.
 
         Returns
         -------
@@ -409,7 +409,7 @@ class Motor(object):
         """
         max_accn = ctypes.c_float()
         max_vel = ctypes.c_float()
-        err_code = _lib.MOT_GetVelParamLimits(self._serial_number, 
+        err_code = _lib.MOT_GetVelParamLimits(self._serial_number,
             ctypes.byref(max_accn), ctypes.byref(max_vel))
         if (err_code != 0):
             raise Exception("Getting velocity parameter limits failed: %s" %
@@ -427,7 +427,7 @@ class Motor(object):
             upper limit
         """
         return self.get_velocity_parameter_limits()[0]
- 
+
     @property
     def velocity_upper_limit(self):
         """
@@ -464,7 +464,7 @@ class Motor(object):
                     _get_error_text(err_code))
         return (direction.value, lim_switch.value, velocity.value,
                 zero_offset.value)
-    
+
     def set_move_home_parameters(self, direction, lim_switch, velocity,
             zero_offset):
         """
@@ -515,7 +515,7 @@ class Motor(object):
         """
         steps_per_rev = ctypes.c_long()
         gear_box_ratio = ctypes.c_long()
-        err_code = _lib.MOT_GetMotorParams(self._serial_number, 
+        err_code = _lib.MOT_GetMotorParams(self._serial_number,
                 ctypes.byref(steps_per_rev),
                 ctypes.byref(gear_box_ratio))
         if (err_code != 0):
@@ -555,7 +555,7 @@ class Motor(object):
         Backlash distance.
         """
         backlash = ctypes.c_float()
-        err_code = _lib.MOT_GetBLashDist(self._serial_number, 
+        err_code = _lib.MOT_GetBLashDist(self._serial_number,
             ctypes.byref(backlash))
         if (err_code != 0):
             raise Exception("Failed getting backlash distance: %s" %
@@ -586,7 +586,7 @@ class Motor(object):
         max_pos = ctypes.c_float()
         units = ctypes.c_long()
         pitch = ctypes.c_float()
-        err_code = _lib.MOT_GetStageAxisInfo(self._serial_number, 
+        err_code = _lib.MOT_GetStageAxisInfo(self._serial_number,
                 ctypes.byref(min_pos),
                 ctypes.byref(max_pos),
                 ctypes.byref(units),
@@ -599,7 +599,7 @@ class Motor(object):
     def set_stage_axis_info(self, min_pos, max_pos, units, pitch):
         """
         Sets axis information of stage.
-        
+
 
         Parameters
         ----------
@@ -647,8 +647,8 @@ class Motor(object):
                 continuity is detected.
             HWLIMSWITCH_BREAKS = 3 : Limit switch is activated when electrical
                 continuity is broken.
-            HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except 
-                switch is ignored other than when homing (e.g. to support 
+            HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except
+                switch is ignored other than when homing (e.g. to support
                 rotation stages).
             HWLIMSWITCH_BREAKS_HOMEONLY = 5 : As per HWLIMSWITCH_BREAKS except
                 switch is ignored other than when homing (e.g. to support
@@ -677,8 +677,8 @@ class Motor(object):
             continuity is detected.
         HWLIMSWITCH_BREAKS = 3 : Limit switch is activated when electrical
             continuity is broken.
-        HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except 
-            switch is ignored other than when homing (e.g. to support 
+        HWLIMSWITCH_MAKES_HOMEONLY = 4 : As per HWLIMSWITCH_MAKES except
+            switch is ignored other than when homing (e.g. to support
             rotation stages).
         HWLIMSWITCH_BREAKS_HOMEONLY = 5 : As per HWLIMSWITCH_BREAKS except
             switch is ignored other than when homing (e.g. to support
@@ -696,11 +696,11 @@ class Motor(object):
             raise Exception("Setting hardware limit switches failed: %s" %
                     _get_error_text(err_code))
 
-    reverse_limit_switch = __property_from_index(0, 
+    reverse_limit_switch = __property_from_index(0,
             get_hardware_limit_switches,
             set_hardware_limit_switches)
     """Reverse limit switch"""
-    forward_limit_switch = __property_from_index(1, 
+    forward_limit_switch = __property_from_index(1,
             get_hardware_limit_switches,
             set_hardware_limit_switches)
     """Forward limit switch"""
@@ -772,12 +772,12 @@ class Motor(object):
             wait until moving is finished.
             Default: False
         """
-        err_code = _lib.MOT_MoveAbsoluteEx(self._serial_number, value, 
+        err_code = _lib.MOT_MoveAbsoluteEx(self._serial_number, value,
                 blocking)
         if (err_code != 0):
             raise Exception("Setting absolute position failed: %s" %
                     _get_error_text(err_code))
-    
+
     def move_by(self, value, blocking = False):
         """
         Move relative to current position.
@@ -790,7 +790,7 @@ class Motor(object):
             wait until moving is finished
             Default: False
         """
-        err_code = _lib.MOT_MoveRelativeEx(self._serial_number, value, 
+        err_code = _lib.MOT_MoveRelativeEx(self._serial_number, value,
                 blocking)
         if (err_code != 0):
             raise Exception("Setting relative position failed: %s" %
@@ -802,7 +802,7 @@ class Motor(object):
         Position of motor. Setting the position is absolute and non-blocking.
         """
         pos = ctypes.c_float()
-        err_code = _lib.MOT_GetPosition(self._serial_number, 
+        err_code = _lib.MOT_GetPosition(self._serial_number,
                 ctypes.byref(pos))
         if (err_code != 0):
             raise Exception("Getting position failed: %s" %
@@ -813,7 +813,7 @@ class Motor(object):
     def position(self, value):
         self.move_to(value, False)
 
-    
+
     def move_home(self, blocking = False):
         """
         Move to home position.
@@ -828,7 +828,7 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Moving velocity failed: %s" %
                     _get_error_text(err_code))
-    
+
     def move_velocity(self, direction):
         """
         Parameters
@@ -841,7 +841,7 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Moving velocity failed: %s" %
                     _get_error_text(err_code))
-    
+
     def stop_profiled(self):
         """
         Stop motor but turn down velocity slowly (profiled).
@@ -892,33 +892,33 @@ class Motor(object):
         fast_forward : int
         """
         err_code = _lib.MOT_SetDCCurrentLoopParams(self._serial_number,
-                proportional, integrator, integrator_limit, 
+                proportional, integrator, integrator_limit,
                 integrator_dead_band, fast_forward)
         if (err_code != 0):
             raise Exception("Setting DC current loop parameters failed: %s" %
                     _get_error_text(err_code))
 
-    dc_current_loop_proportional = __property_from_index(0, 
+    dc_current_loop_proportional = __property_from_index(0,
             get_dc_current_loop_parameters,
             set_dc_current_loop_parameters)
     """DC current loop: proportional term"""
-    dc_current_loop_integrator = __property_from_index(1, 
+    dc_current_loop_integrator = __property_from_index(1,
             get_dc_current_loop_parameters,
             set_dc_current_loop_parameters)
     """DC current loop: integrator term"""
-    dc_current_loop_integrator_limit = __property_from_index(2, 
+    dc_current_loop_integrator_limit = __property_from_index(2,
             get_dc_current_loop_parameters,
             set_dc_current_loop_parameters)
     """DC current loop: integrator limit"""
-    dc_current_loop_integrator_dead_band = __property_from_index(3, 
+    dc_current_loop_integrator_dead_band = __property_from_index(3,
             get_dc_current_loop_parameters,
             set_dc_current_loop_parameters)
     """DC current loop: integrator dead band"""
-    dc_current_loop_fast_forward = __property_from_index(4, 
+    dc_current_loop_fast_forward = __property_from_index(4,
             get_dc_current_loop_parameters,
             set_dc_current_loop_parameters)
     """DC current loop: fast forward"""
-    
+
     def get_dc_position_loop_parameters(self):
         """
         Returns DC position loop parameters.
@@ -952,17 +952,17 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Getting DC position loop parameters failed: %s" %
                     _get_error_text(err_code))
-        return (proportional.value, 
-                integrator.value, 
+        return (proportional.value,
+                integrator.value,
                 integrator_limit.value,
-                differentiator.value, 
+                differentiator.value,
                 differentiator_time_constant.value,
                 loop_gain.value,
                 velocity_fast_forward.value,
                 acceleration_fast_forward.value,
                 position_error_limit.value
                )
-    
+
     def set_dc_position_loop_parameters(self, proportional, integrator,
             integrator_limit, differentiator, differentiator_time_constant,
             loop_gain, velocity_fast_forward, acceleration_fast_forward,
@@ -983,8 +983,8 @@ class Motor(object):
         position_error_limit : int
         """
         err_code = _lib.MOT_SetDCPositionLoopParams(self._serial_number,
-                proportional, 
-                integrator, 
+                proportional,
+                integrator,
                 integrator_limit,
                 differentiator,
                 differentiator_time_constant,
@@ -1023,7 +1023,7 @@ class Motor(object):
     dc_position_loop_position_error_limit = __property_from_index(8,
             get_dc_position_loop_parameters, set_dc_position_loop_parameters)
     """DC position loop: position error limit"""
-    
+
     def get_dc_motor_output_parameters(self):
         """
         Returns DC motor output parameters.
@@ -1045,8 +1045,8 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Getting DC motor output parameters failed: %s" %
                     _get_error_text(err_code))
-        return (continuous_current_limit.value, 
-                energy_limit.value, 
+        return (continuous_current_limit.value,
+                energy_limit.value,
                 motor_limit.value,
                 motor_bias.value
                )
@@ -1064,8 +1064,8 @@ class Motor(object):
         motor_bias : float
         """
         err_code = _lib.MOT_SetDCMotorOutputParams(self._serial_number,
-                continuous_current_limit, 
-                energy_limit, 
+                continuous_current_limit,
+                energy_limit,
                 motor_limit,
                 motor_bias)
         if (err_code != 0):
@@ -1084,8 +1084,8 @@ class Motor(object):
     dc_motor_output_motor_bias = __property_from_index(3,
             get_dc_motor_output_parameters, set_dc_motor_output_parameters)
     """DC motor output: motor bias"""
-    
-    
+
+
     def get_dc_track_settle_parameters(self):
         """
         Returns DC track settle parameters.
@@ -1105,12 +1105,12 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Getting DC track settle parameters failed: %s" %
                     _get_error_text(err_code))
-        return (settle_time.value, 
-                settle_window.value, 
+        return (settle_time.value,
+                settle_window.value,
                 track_window.value
                )
-    
-    def set_dc_track_settle_parameters(self, settle_time, settle_window, 
+
+    def set_dc_track_settle_parameters(self, settle_time, settle_window,
             track_window):
         """
         Sets track settle parameters.
@@ -1122,8 +1122,8 @@ class Motor(object):
         track_window : int
         """
         err_code = _lib.MOT_SetDCTrackSettleParams(self._serial_number,
-                settle_time, 
-                settle_window, 
+                settle_time,
+                settle_window,
                 track_window)
         if (err_code != 0):
             raise Exception("Setting DC track settle parameters failed: %s" %
@@ -1138,7 +1138,7 @@ class Motor(object):
     dc_track_settle_track_window = __property_from_index(2,
             get_dc_track_settle_parameters, set_dc_track_settle_parameters)
     """DC track settle: track window"""
-    
+
 
     def get_dc_profile_mode_parameters(self):
         """
@@ -1149,7 +1149,7 @@ class Motor(object):
         -------
         out : tuple
             (profile mode, jerk)
-            
+
             Profile mode:
             - DC_PROFILEMODE_TRAPEZOIDAL = 0
             - DC_PROFILEMODE_SCURVE = 2
@@ -1162,10 +1162,10 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Getting DC profile mode parameters failed: %s" %
                     _get_error_text(err_code))
-        return (profile_mode.value, 
+        return (profile_mode.value,
                 jerk.value
                )
-    
+
     def set_dc_profile_mode_parameters(self, profile_mode, jerk):
         """
         Sets DC profile mode parameters.
@@ -1183,7 +1183,7 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Setting DC profile mode parameters failed: %s" %
                     _get_error_text(err_code))
-    
+
     dc_profile_mode = __property_from_index(0,
             get_dc_profile_mode_parameters, set_dc_profile_mode_parameters)
     """DC profile mode: profile mode"""
@@ -1218,13 +1218,13 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Getting DC joystick parameters failed: %s" %
                     _get_error_text(err_code))
-        return (maximum_velocity_lo.value, 
+        return (maximum_velocity_lo.value,
                 maximum_velocity_hi.value,
                 acceleration_lo.value,
                 acceleration_hi.value,
                 direction_sense.value
                )
-    
+
     def set_dc_joystick_parameters(self, maximum_velocity_lo,
             maximum_velocity_hi, acceleration_lo, acceleration_hi,
             direction_sense):
@@ -1249,7 +1249,7 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Setting DC joystick parameters failed: %s" %
                     _get_error_text(err_code))
-    
+
     dc_joystick_maximum_velocity_lo = __property_from_index(0,
             get_dc_joystick_parameters, set_dc_joystick_parameters)
     """DC joystick: maximum velocity lo"""
@@ -1265,7 +1265,7 @@ class Motor(object):
     dc_joystick_direction_sense = __property_from_index(4,
             get_dc_joystick_parameters, set_dc_joystick_parameters)
     """DC joystick: direction sense"""
-    
+
     def get_dc_settled_current_loop_parameters(self):
         """
         Returns DC settled current loop parameters.
@@ -1290,15 +1290,15 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Getting DC settled current loop parameters " \
                     "failed: %s" % _get_error_text(err_code))
-        return (settled_proportional.value, 
+        return (settled_proportional.value,
                 settled_integrator.value,
                 settled_integrator_limit.value,
                 settled_integrator_dead_band.value,
                 settled_fast_forward.value
                )
-    
+
     def set_dc_settled_current_loop_parameters(self, settled_proportional,
-            settled_integrator, settled_integrator_limit, 
+            settled_integrator, settled_integrator_limit,
             settled_integrator_dead_band, settled_fast_forward):
         """
         Sets DC settled current loop parameters.
@@ -1320,7 +1320,7 @@ class Motor(object):
         if (err_code != 0):
             raise Exception("Setting DC settled current loop parameters " \
                     "failed: %s" % _get_error_text(err_code))
-    
+
     dc_settled_current_loop_proportional = __property_from_index(0,
             get_dc_settled_current_loop_parameters,
             set_dc_settled_current_loop_parameters)
@@ -1350,7 +1350,7 @@ def _load_library():
     # load library
     if (os.name != 'nt'):
         raise Exception("Your operating system is not supported. " \
-                "Thorlabs' APT API only works on Windows.")  
+                "Thorlabs' APT API only works on Windows.")
     lib = None
     filename = ctypes.util.find_library("APT")
     if (filename is not None):
@@ -1364,8 +1364,10 @@ def _load_library():
             if (lib is None):
                 raise Exception("Could not find shared library APT.dll.")
     _APTAPI.set_ctypes_argtypes(lib)
-    if (lib.APTInit() != 0):
-        raise Exception("Thorlabs APT Initialization failed.")
+    err_code = lib.APTInit()
+    if (err_code != 0):
+        raise Exception("Thorlabs APT Initialization failed: " \
+                        "%s" % _get_error_text(err_code))
     if (lib.EnableEventDlg(False) != 0):
         raise Exception("Couldn't disable event dialog.")
     return lib
