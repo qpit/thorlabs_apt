@@ -22,14 +22,17 @@ I have tested thorlabs_apt only with the K10CR1 rotation stage, but it should wo
 - BSC101
     - NRT150
 - BSC201
-- K10CR1
+- K10CR1 (*)
 - KDC101
 - NT100 (#12)
 - TDC001
 
+(*) see known issues.
+
 **Known issues**
 
-- If the package has been imported and a new device is plugged into the USB port, list_available_devices() cannot find it. The reason is that the list of available devices in APT.DLL is initialized when APTInit() is called. However, calling APTCleanUp() and APTInit() will kill all existing communication to other devices. If you have a good solution for that, I'm happy to hear it, but I fear that this is a limitation of APT.DLL.
+- If the package has been imported and a new device is plugged into the USB port, `list_available_devices()` cannot find it. The reason is that the list of available devices in APT.DLL is initialized when APTInit() is called. However, calling APTCleanUp() and APTInit() will kill all existing communication to other devices. If you have a good solution for that, I'm happy to hear it, but I fear that this is a limitation of APT.DLL.
+- K10CR1: default move home parameters are invalid which prevents homing. Use `set_move_home_parameters()` to set them manually.
 
 **Example**
 
