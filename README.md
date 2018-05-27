@@ -19,6 +19,8 @@ Since this package is based on APT.dll it only works on Windows. For Linux and M
 
 I have tested thorlabs_apt only with the K10CR1 rotation stage, but it should work with all motors supported by APT. If it works with other motors as well, please let me know and I will add it here. Otherwise file a bug report or fix the problem yourself and open a pull request.
 
+- BSC101
+    - NRT150
 - BSC201
 - K10CR1
 - KDC101
