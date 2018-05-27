@@ -23,6 +23,7 @@ I have tested thorlabs_apt only with the K10CR1 rotation stage, but it should wo
 - K10CR1
 - KDC101
 - NT100 (#12)
+- TDC001
 
 **Known issues**
 
