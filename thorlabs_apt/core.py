@@ -564,7 +564,7 @@ class Motor(object):
             return backlash.value
 
     @backlash_distance.setter
-    def blacklash_distance(self, value):
+    def backlash_distance(self, value):
         err_code = _lib.MOT_SetBLashDist(self._serial_number, value)
         if (err_code != 0):
             raise Exception("Setting backlash distance failed: %s" %
