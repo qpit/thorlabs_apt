@@ -21,7 +21,7 @@ CLASSIFIERS = [
 ]
 PLATFORMS = ['Windows']
 MAJOR               = 0
-MINOR               = 1
+MINOR               = 2
 ISRELEASED          = False
 VERSION             = '%d.%d' % (MAJOR, MINOR)
 
