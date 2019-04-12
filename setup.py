@@ -12,11 +12,11 @@ thorlabs_apt provides a wrapper for Thorlabs\' APT, a library to control differe
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
     'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: GNU General Public License v2 (GPLv2)'
+    'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
     'Programming Language :: Python',
     'Topic :: Scientific/Engineering',
-    'Topic :: Software Development :: Libraries'
-    'Topic :: System :: Hardware'
+    'Topic :: Software Development :: Libraries',
+    'Topic :: System :: Hardware',
     'Operating System :: Microsoft :: Windows'
 ]
 PLATFORMS = ['Windows']
