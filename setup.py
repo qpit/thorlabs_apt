@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-NAME = 'thorlabs_apt'
+NAME = 'thorlabs_apt_2'
 AUTHOR = 'Tobias Gehring'
 AUTHOR_EMAIL = 'tobias.gehring@fysik.dtu.dk'
 LICENSE = 'GPLv2'
