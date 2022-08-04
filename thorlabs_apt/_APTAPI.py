@@ -102,6 +102,12 @@ def set_ctypes_argtypes(lib):
     lib.MOT_GetHomeParams.argtypes = [c_long, c_long_p, c_long_p, c_float_p, 
             c_float_p]
     lib.MOT_GetHomeParams.restype = c_long
+    lib.MOT_SetJogParams.argtypes = [c_long, c_long, c_long, c_float, c_float, c_float, c_float]
+    lib.MOT_SetJogParams.restypes = c_long
+    lib.MOT_GetJogParams.argtypes = [c_long, c_long_p, c_long_p, c_float_p, c_float_p, c_float_p, c_float_p]
+    lib.MOT_GetJogParams.restypes = c_long
+    lib.MOT_MoveJog.argtypes = [c_long, c_long, c_bool]
+    lib.MOT_MoveJog.restypes = c_long
     lib.MOT_GetStatusBits.argtypes = [c_long, c_long_p]
     lib.MOT_GetStatusBits.restype = c_long
     lib.MOT_SetBLashDist.argtypes = [c_long, c_float]
