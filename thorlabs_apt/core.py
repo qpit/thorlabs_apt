@@ -440,6 +440,52 @@ class Motor(object):
         """
         return self.get_velocity_parameter_limits()[1]
 
+    def get_jog_parameters(self):
+        """
+        Returns jog parameters.
+
+        Returns
+        -------
+        out : tuple
+            (Mode, StopMode, StepSize, MinVel, Accn, MaxVel)
+        """
+        Mode = ctypes.c_long()
+        StopMode = ctypes.c_long()
+        StepSize = ctypes.c_float()
+        MinVel = ctypes.c_float()
+        Accn = ctypes.c_float()
+        MaxVel = ctypes.c_float()
+        err_code = _lib.MOT_GetJogParams(self._serial_number,
+                ctypes.byref(Mode),
+                ctypes.byref(StopMode),
+                ctypes.byref(StepSize),
+                ctypes.byref(MinVel),
+                ctypes.byref(Accn),
+                ctypes.byref(MaxVel))
+        if (err_code != 0):
+            raise Exception("Getting jog parameters failed: %s" %
+                    _get_error_text(err_code))
+        return (Mode.value, StopMode.value, StepSize.value,
+                MinVel.value, Accn.value, MaxVel.value)
+
+    def set_jog_parameters(self, Mode, StopMode, StepSize, MinVel, Accn, MaxVel):
+        """
+        Sets jog parameters.
+
+        Parameters
+        ----------
+        Mode : int
+        StopMode : int
+        StepSize : float
+        MinVel : float
+        Accn : float
+        MaxVel : float
+        """
+        err_code = _lib.MOT_SetJogParams(self._serial_number, Mode,
+                StopMode, StepSize, MinVel, Accn, MaxVel)
+        if (err_code != 0):
+            raise Exception("Setting jog parameters failed: %s" %
+                    _get_error_text(err_code))
 
     def get_move_home_parameters(self):
         """
@@ -796,6 +842,26 @@ class Motor(object):
             raise Exception("Setting relative position failed: %s" %
                     _get_error_text(err_code))
 
+    def move_jog(self, direction, blocking = False):
+        """
+        Move jog.
+
+        Parameters
+        ----------
+        direction : int
+            direction of movement
+            MOVE_FWD = 1 : move in forward direction.
+            MOVE_REV = 2 : move in reverse direction.
+        blocking : bool
+            wait until moving is finished
+            Default: False
+        """
+        err_code = _lib.MOT_MoveJog(self._serial_number, direction,
+                blocking)
+        if (err_code != 0):
+            raise Exception("Jog movement failed: %s" %
+                    _get_error_text(err_code))
+            
     @property
     def position(self):
         """
